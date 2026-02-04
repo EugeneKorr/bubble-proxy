@@ -41,7 +41,7 @@ check_env() {
 
 create_dirs() {
     info "Creating necessary directories..."
-    mkdir -p certbot/www certbot/conf logs/nginx logs/certbot logs/monitor
+    mkdir -p certbot/www certbot/conf logs/nginx logs/certbot logs/monitor nginx/geoip
     success "Directories created"
 }
 
@@ -80,12 +80,12 @@ server {
 EOF
 
     info "Starting nginx for certificate validation..."
-    docker-compose up -d nginx
+    docker compose up -d nginx
     
     sleep 5
     
     info "Requesting SSL certificate from Let's Encrypt..."
-    docker-compose run --rm certbot certonly \
+    docker compose run --rm certbot certonly \
         --webroot \
         --webroot-path=/var/www/certbot \
         --email "$SSL_EMAIL" \
@@ -98,7 +98,7 @@ EOF
         
         prepare_nginx_config
         
-        docker-compose restart nginx
+        docker compose restart nginx
         
         success "Nginx restarted with SSL configuration"
     else
@@ -112,7 +112,7 @@ start() {
     create_dirs
     prepare_nginx_config
     
-    docker-compose up -d
+    docker compose up -d
     
     success "$PROJECT_NAME started successfully"
     info "Check status: ./deploy.sh status"
@@ -121,7 +121,7 @@ start() {
 
 stop() {
     info "Stopping $PROJECT_NAME..."
-    docker-compose down
+    docker compose down
     success "$PROJECT_NAME stopped"
 }
 
@@ -134,22 +134,22 @@ restart() {
 
 logs() {
     if [ -n "$2" ]; then
-        docker-compose logs -f "$2"
+        docker compose logs -f "$2"
     else
-        docker-compose logs -f
+        docker compose logs -f
     fi
 }
 
 status() {
-    docker-compose ps
+    docker compose ps
     
     echo ""
     info "Nginx status:"
-    docker-compose exec nginx nginx -t 2>&1 || true
+    docker compose exec nginx nginx -t 2>&1 || true
     
     echo ""
     info "SSL certificates:"
-    docker-compose run --rm certbot certificates || true
+    docker compose run --rm certbot certificates || true
 }
 
 update_config() {
@@ -158,7 +158,7 @@ update_config() {
     prepare_nginx_config
     
     info "Reloading nginx..."
-    docker-compose exec nginx nginx -s reload
+    docker compose exec nginx nginx -s reload
     
     success "Configuration updated"
 }
@@ -217,7 +217,7 @@ restore() {
 
 test_monitor() {
     info "Running manual health check..."
-    docker-compose run --rm monitor python /app/check.py
+    docker compose run --rm monitor python /app/check.py
 }
 
 show_help() {

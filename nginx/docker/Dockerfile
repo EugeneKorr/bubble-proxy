@@ -18,9 +18,9 @@ RUN apk add --no-cache \
 RUN cd /tmp \
     && git clone --depth 1 https://github.com/leev/ngx_http_geoip2_module.git \
     && cd /tmp \
-    && curl -fSL https://nginx.org/download/nginx-1.25.3.tar.gz -o nginx.tar.gz \
+    && curl -fSL https://nginx.org/download/nginx-1.25.5.tar.gz -o nginx.tar.gz \
     && tar -zxC /tmp -f nginx.tar.gz \
-    && cd /tmp/nginx-1.25.3 \
+    && cd /tmp/nginx-1.25.5 \
     && ./configure --with-compat --add-dynamic-module=/tmp/ngx_http_geoip2_module \
     && make modules \
     && cp objs/ngx_http_geoip2_module.so /usr/lib/nginx/modules/ \

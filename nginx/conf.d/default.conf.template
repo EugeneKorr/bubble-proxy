@@ -7,7 +7,6 @@ upstream bubble_backend {
 
 server {
     listen 80;
-    listen [::]:80;
     server_name ${DOMAIN};
 
     location /.well-known/acme-challenge/ {
@@ -27,7 +26,6 @@ server {
 
 server {
     listen 443 ssl;
-    listen [::]:443 ssl;
     http2 on;
     server_name ${DOMAIN};
 
@@ -67,7 +65,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
+
         # GeoIP: страна пользователя
         proxy_set_header X-Forwarded-Country $geoip2_data_country_code;
         proxy_set_header X-Forwarded-Country-Name $geoip2_data_country_name;
@@ -104,7 +102,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
+
         # GeoIP: страна пользователя
         proxy_set_header X-Forwarded-Country $geoip2_data_country_code;
         proxy_set_header X-Forwarded-Country-Name $geoip2_data_country_name;
@@ -138,7 +136,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
+
         # GeoIP: страна пользователя
         proxy_set_header X-Forwarded-Country $geoip2_data_country_code;
         proxy_set_header X-Forwarded-Country-Name $geoip2_data_country_name;
@@ -169,7 +167,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
-        
+
         # GeoIP: страна пользователя
         proxy_set_header X-Forwarded-Country $geoip2_data_country_code;
         proxy_set_header X-Forwarded-Country-Name $geoip2_data_country_name;

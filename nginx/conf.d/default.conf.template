@@ -173,7 +173,7 @@ server {
     }
 
     # Bubble системные запросы (init/data) - возвращаем пустой ответ с CORS
-    location ~ ^/version-test/api/1\.1/init/ {
+    location ^~ /version-test/api/1.1/init/ {
         add_header 'Access-Control-Allow-Origin' 'https://ru.vega-ex.com' always;
         add_header 'Access-Control-Allow-Credentials' 'true' always;
         add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;

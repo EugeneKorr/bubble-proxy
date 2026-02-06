@@ -61,7 +61,12 @@ server {
 
     # Статика — кэшируем
     location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
-        # CORS
+        # Скрываем CORS от Bubble
+        proxy_hide_header Access-Control-Allow-Origin;
+        proxy_hide_header Access-Control-Allow-Methods;
+        proxy_hide_header Access-Control-Allow-Headers;
+        
+        # Наши CORS
         add_header 'Access-Control-Allow-Origin' '*' always;
 
         proxy_pass https://bubble_backend;
@@ -101,6 +106,11 @@ server {
 
     # telegram-web-app.js
     location ~ ^/(telegram-web-app\.js|telegram-web-app\.min\.js) {
+        # Скрываем CORS от Bubble
+        proxy_hide_header Access-Control-Allow-Origin;
+        proxy_hide_header Access-Control-Allow-Methods;
+        proxy_hide_header Access-Control-Allow-Headers;
+        
         add_header Access-Control-Allow-Origin "*" always;
         add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
         add_header Access-Control-Allow-Headers "Content-Type" always;
@@ -133,6 +143,12 @@ server {
 
     # API
     location ~ ^/api/ {
+        # Скрываем CORS от Bubble
+        proxy_hide_header Access-Control-Allow-Origin;
+        proxy_hide_header Access-Control-Allow-Methods;
+        proxy_hide_header Access-Control-Allow-Headers;
+        proxy_hide_header Access-Control-Max-Age;
+        
         # CORS preflight для API
         if ($request_method = 'OPTIONS') {
             add_header 'Access-Control-Allow-Origin' '*' always;
@@ -178,8 +194,64 @@ server {
         proxy_read_timeout 15s;
     }
 
+    # version-test пути (для Bubble workflows)
+    location ~ ^/version-test/ {
+        # Скрываем CORS от Bubble
+        proxy_hide_header Access-Control-Allow-Origin;
+        proxy_hide_header Access-Control-Allow-Methods;
+        proxy_hide_header Access-Control-Allow-Headers;
+        proxy_hide_header Access-Control-Max-Age;
+        
+        # CORS preflight
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' '*' always;
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+            add_header 'Access-Control-Max-Age' 1728000 always;
+            add_header 'Content-Type' 'text/plain; charset=utf-8' always;
+            add_header 'Content-Length' 0 always;
+            return 204;
+        }
+
+        # CORS для обычных запросов
+        add_header 'Access-Control-Allow-Origin' '*' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+        add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
+
+        proxy_pass https://bubble_backend;
+        proxy_ssl_server_name on;
+        proxy_ssl_name ${BUBBLE_DOMAIN};
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+
+        proxy_set_header Host ${BUBBLE_DOMAIN};
+        proxy_set_header X-Real-IP $real_ip;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # GeoIP
+        proxy_set_header X-Forwarded-Country $geoip2_data_country_code;
+        proxy_set_header X-Forwarded-Country-Name $geoip2_data_country_name;
+
+        proxy_hide_header Alt-Svc;
+
+        proxy_buffering on;
+        proxy_buffer_size 8k;
+        proxy_buffers 16 8k;
+
+        proxy_connect_timeout 10s;
+        proxy_send_timeout 30s;
+        proxy_read_timeout 30s;
+    }
+
     # Всё остальное (HTML, WebSocket)
     location / {
+        # Скрываем CORS от Bubble
+        proxy_hide_header Access-Control-Allow-Origin;
+        proxy_hide_header Access-Control-Allow-Methods;
+        proxy_hide_header Access-Control-Allow-Headers;
+        
         # CORS preflight
         if ($request_method = 'OPTIONS') {
             add_header 'Access-Control-Allow-Origin' '*' always;
@@ -241,4 +313,3 @@ server {
         proxy_read_timeout 30s;
     }
 }
-

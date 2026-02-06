@@ -61,6 +61,9 @@ server {
 
     # Статика — кэшируем
     location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        # CORS
+        add_header 'Access-Control-Allow-Origin' '*' always;
+
         proxy_pass https://bubble_backend;
         proxy_ssl_server_name on;
         proxy_ssl_name ${BUBBLE_DOMAIN};
@@ -98,6 +101,10 @@ server {
 
     # telegram-web-app.js
     location ~ ^/(telegram-web-app\.js|telegram-web-app\.min\.js) {
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Content-Type" always;
+
         proxy_pass https://bubble_backend;
         proxy_ssl_server_name on;
         proxy_ssl_name ${BUBBLE_DOMAIN};
@@ -119,10 +126,6 @@ server {
         proxy_cache_valid 200 1h;
         add_header X-Cache-Status $upstream_cache_status;
 
-        add_header Access-Control-Allow-Origin "*" always;
-        add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
-        add_header Access-Control-Allow-Headers "Content-Type" always;
-
         proxy_connect_timeout 10s;
         proxy_send_timeout 10s;
         proxy_read_timeout 10s;
@@ -130,6 +133,23 @@ server {
 
     # API
     location ~ ^/api/ {
+        # CORS preflight для API
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' '*' always;
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+            add_header 'Access-Control-Max-Age' 1728000 always;
+            add_header 'Content-Type' 'text/plain; charset=utf-8' always;
+            add_header 'Content-Length' 0 always;
+            return 204;
+        }
+
+        # CORS для обычных API запросов
+        add_header 'Access-Control-Allow-Origin' '*' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+        add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
+
         limit_req zone=api burst=20 nodelay;
 
         proxy_pass https://bubble_backend;
@@ -160,6 +180,23 @@ server {
 
     # Всё остальное (HTML, WebSocket)
     location / {
+        # CORS preflight
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' '*' always;
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+            add_header 'Access-Control-Max-Age' 1728000 always;
+            add_header 'Content-Type' 'text/plain; charset=utf-8' always;
+            add_header 'Content-Length' 0 always;
+            return 204;
+        }
+
+        # CORS для обычных запросов
+        add_header 'Access-Control-Allow-Origin' '*' always;
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+        add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+        add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
+
         proxy_pass https://bubble_backend;
         proxy_ssl_server_name on;
         proxy_ssl_name ${BUBBLE_DOMAIN};
@@ -204,3 +241,4 @@ server {
         proxy_read_timeout 30s;
     }
 }
+
